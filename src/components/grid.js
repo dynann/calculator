@@ -1,5 +1,4 @@
-import { calculateNewValue } from "@testing-library/user-event/dist/utils"
-import { useState} from "react"
+import { useState, useEffect} from "react"
 
 const Grid = () => {
 
@@ -8,6 +7,7 @@ const Grid = () => {
     const [total, setTotal] = useState(0)
     const [lastOperator, setOperator] = useState(null)
     const [firstNum, setFirstNum] = useState(true)
+    const [saveTotal, setSaveTotal] = useState('')
 
 
     const numberClick = (number) => {
@@ -24,7 +24,6 @@ const Grid = () => {
         setNewNum(true)
         setTotal(0)
     }
-
 
     const operatorClick = (operator) => {
       let currentValue = parseInt(display) || 0
@@ -56,6 +55,25 @@ const Grid = () => {
           return currentValue
       }
     }
+
+    useEffect(() => {
+      if(saveTotal.length !== 0) {
+        setTotal(() => {
+          localStorage.getItem('total', total)
+        })
+      }
+    })
+
+    useEffect(() => {
+
+     if(total){
+       const saveTotal = localStorage.getItem()
+     } 
+
+      return () => {
+        console.log('component unmount')
+      }
+    }, )
 
     const equalClick = () => {
       if(!lastOperator || newNum) return 
