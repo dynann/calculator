@@ -1,5 +1,7 @@
 import { useState, useEffect} from "react"
+import CalculationHistory from './history.js'
 
+ 
 const Grid = () => {
 
     const [display, setDisplay] = useState('')
@@ -7,9 +9,34 @@ const Grid = () => {
     const [total, setTotal] = useState(0)
     const [lastOperator, setOperator] = useState(null)
     const [firstNum, setFirstNum] = useState(true)
-    const [saveTotal, setSaveTotal] = useState('')
+    const [saveTotal, setSaveTotal] = useState([])
 
+      //use effect for mount component
+      useEffect(() => {
+        const savedCalculation = localStorage.getItem('saveCalculation')
+        if(savedCalculation){
+          setSaveTotal(savedCalculation.split(","))
+        }
+      }, [])
 
+      //saved total calculation to local Storage 
+      useEffect(() => {
+        //update local Storage
+        if(saveTotal.length !== 0){
+          localStorage.setItem('saveCalculation', saveTotal)
+        } else {
+          localStorage.removeItem('saveCalculation', saveTotal)
+        }
+      }, [saveTotal])
+
+      //unmount component
+      useEffect(() => {
+        return() => {
+          console.log("unmount component")
+        }
+      })
+
+      //number click
     const numberClick = (number) => {
       if(newNum){
         setDisplay(number)
@@ -19,12 +46,16 @@ const Grid = () => {
       }
   
     }
+
+    //remove all number from fields
     const acClick = () => {
         setDisplay('')
         setNewNum(true)
         setTotal(0)
     }
 
+
+    //operator click
     const operatorClick = (operator) => {
       let currentValue = parseInt(display) || 0
       if(firstNum){
@@ -40,6 +71,7 @@ const Grid = () => {
     }
 
 
+    //calculate result
     const calculateResult = (currentTotal, current, operator) => {
       const currentValue = parseInt(current)
       switch(operator){
@@ -56,24 +88,7 @@ const Grid = () => {
       }
     }
 
-    useEffect(() => {
-      if(saveTotal.length !== 0) {
-        setTotal(() => {
-          localStorage.getItem('total', total)
-        })
-      }
-    })
 
-    useEffect(() => {
-
-     if(total){
-       const saveTotal = localStorage.getItem()
-     } 
-
-      return () => {
-        console.log('component unmount')
-      }
-    }, )
 
     const equalClick = () => {
       if(!lastOperator || newNum) return 
@@ -84,7 +99,16 @@ const Grid = () => {
       setNewNum(true)
       setFirstNum(true)
       setOperator(null)
+      setSaveTotal([...saveTotal, result])
     }
+
+
+    //delete calculation history
+    const deleteHistory = (index) => {
+      const updateHistory = saveTotal.filter((_, i) => i !== index);
+      setSaveTotal(updateHistory)
+    }
+    
 
     return(
       <div>
@@ -124,6 +148,18 @@ const Grid = () => {
             </tr>
           </tbody>
         </table>
+
+        <div class="section">
+
+        <h1>Calculation History</h1>
+        {saveTotal.map((history, index) => {
+          return (
+            <div key={index}>
+              <CalculationHistory history={history} onDelete={() => deleteHistory(index)}></CalculationHistory>
+            </div>
+          )
+        })}
+        </div>
       </div>
     )
 }
